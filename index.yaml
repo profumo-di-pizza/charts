@@ -1,0 +1,17 @@
+apiVersion: v1
+entries:
+  common:
+  - apiVersion: v2
+    created: "2026-03-17T08:18:31.153933524Z"
+    description: Generic application chart — Deployment, Service, and optional ConfigMap.
+      Used as a single Helm chart for all services in the profumo-di-pizza.
+    digest: 535fa0f99c63e7ab9bfbac90b7d4b15ae3912d8fc6794fda2b99451cabde53a8
+    maintainers:
+    - email: iam@profumo-di-pizza.jakuboskera.dev
+      name: jakuboskera
+    name: common
+    type: application
+    urls:
+    - https://github.com/profumo-di-pizza/charts/releases/download/common-0.1.0/common-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-03-17T08:18:31.153942832Z"
