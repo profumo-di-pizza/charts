@@ -24,7 +24,7 @@ jobs:
       - name: Add dependency chart repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add profumo-di-pizza https://profumo-di-pizza.github.io/charts
+          # helm repo add profumo-di-pizza https://profumo-di-pizza.github.io/charts
 
       - name: Build chart dependencies
         run: |
