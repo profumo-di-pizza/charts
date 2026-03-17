@@ -1,0 +1,10 @@
+apiVersion: v2
+name: common
+description: >-
+  Generic application chart — Deployment, Service, and optional ConfigMap.
+  Used as a single Helm chart for all services in the profumo-di-pizza.
+type: application
+version: 0.1.0
+maintainers:
+- name: jakuboskera
+  email: iam@profumo-di-pizza.jakuboskera.dev
