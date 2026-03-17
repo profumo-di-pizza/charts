@@ -1,0 +1,69 @@
+name: Generate Chart Readme
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'charts/**/values.yaml'
+
+jobs:
+  generate-chart-readme:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout bitnami-labs/readme-generator-for-helm
+        uses: actions/checkout@v4
+        with:
+          repository: 'bitnami-labs/readme-generator-for-helm'
+          ref: '967764dacee72c05fc5d01c84c13ebb5dab7ac8b'
+          path: readme-generator-for-helm
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('readme-generator-for-helm/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Install readme-generator-for-helm dependencies
+        run: cd readme-generator-for-helm && npm install
+
+      - name: Checkout profumo-di-pizza/charts
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          path: charts
+
+      - name: Get list of files with changes in Pull Request
+        id: pr-file-changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files \
+            --paginate --jq '.[].filename' | grep 'values\.yaml$' | grep -v '/ci/' > raw-inputs || true
+
+      - name: Prepare readme-generator-for-helm inputs
+        run: |
+          cat raw-inputs | sed 's/values.yaml/README.md/' >> raw-inputs
+          cat raw-inputs | sed 's/values.yaml/values.schema.json/' >> raw-inputs
+          cat raw-inputs | sed 's/charts/charts\/charts/' > prepared-inputs
+
+      - name: Execute readme-generator-for-helm
+        run: readme-generator-for-helm/bin/index.js -r $(cat prepared-inputs | grep README) -v $(cat prepared-inputs | grep values) -m $(cat prepared-inputs | grep schema)
+
+      - name: Commit files to PR
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "charts/*/README.md charts/*/values.schema.json"
+          cwd: "./charts"
+          message: "fix: Update chart's README.md"
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
